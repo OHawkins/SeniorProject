@@ -1,0 +1,14 @@
+#!/bin/bash
+git add .
+git commit -m "Initial Development"
+git push heroku master
+
+# If the database needs to be rebuilt, then this can be done
+# heroku run python3 init.py
+if [ "$1" = "-rebuilddb" ]; then
+  echo "re-initializing and rebuilding the database"
+  heroku run python3 init.py
+fi
+heroku restart
+
+

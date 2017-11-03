@@ -1,0 +1,9 @@
+{
+  "name": "Pathwerks",
+  "description": "The database backend to the Pathwerks Android App",
+  "image": "heroku/python",
+  "website": "https://hidden-shore-94090.herokuapp.com/",
+  "repository": "https://git.heroku.com/hidden-shore-94090",
+  "keywords": ["python" ],
+  "addons": [ "heroku-postgresql" ]
+}

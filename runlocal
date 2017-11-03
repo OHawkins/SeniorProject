@@ -1,0 +1,7 @@
+#!/bin/bash
+# Go to localhost:5000/whatever the url path is/
+# to test the api locally. If you need to rebuild the database
+# run initlocal to rebuild it prior to running this command.
+source venv/bin/activate
+source .env
+heroku local
