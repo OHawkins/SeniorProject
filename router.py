@@ -22,6 +22,17 @@ BAD_REQUEST = 400
 
 app = Flask(__name__)
 
+# Functions to write:
+	# make new user
+	# log in
+	# forgot password
+	# searh for user
+	# search for event
+	# create new event
+	# edit event
+	# view/get event
+	# view/get user
+
 def connect_db():
 	print("In connect_db")
 	if not 'DATABASE_URL' in os.environ:
@@ -142,6 +153,43 @@ def confirm_identity():
 
 	return (email, userid)
 
+
+
+# --------------------------------------------------------------------
+@app.route('/newuser/<email>/<password>')
+def addUser(email, password):
+	db = get_db()
+	cur = db.cursor()
+
+	cur.execute("""SELECT * FROM "User" WHERE email = %s;""", (email,))
+	lst = cur.fetchall()
+
+	if len(lst) != 0:
+		# We're trying to add a user but it is already in the database
+		print("YO WE ALREADY ADDED THIS EMAIL: " + email)
+		return "Error: user already added.", BAD_REQUEST
+
+	# The user (email) isn't in the database, so we can add the email and hashed password in
+	hashed_password = get_hashed_password(password)
+	cur.execute("""INSERT INTO "User" (email, password) VALUES (%s, %s);""", (email, hashed_password))
+	db.commit()
+
+	token = generate_token(email)
+	sg = sendgrid.SendGridAPIClient(apikey = os.environ.get('SENDGRID_API_KEY'))
+	from_email = Email("hawkol01@luther.edu")
+	to_email = Email(email)
+	subject = "Confirm your dedication to time management!"
+	content= Content("test/html", """<a href=https://time-management-app13.herokuapp.com/verifyuser/""" + token + """">Please click this link to begin your journey of self-discovery using Boop!</a>""")
+	mail = Mail(from_email, subject, to_email, content)
+	response = sg.client.mail.send.post(request_body = mail.get())
+
+	session['token'] = token
+	return token 
+	# INSERT INTO APPROPRIATE TABLES
+# --------------------------------------------------------------------
+
+
+
 @app.route('/newuser/<email>/<password>')
 def newuser(email,password):
 	print("In newuser")
@@ -154,7 +202,7 @@ def newuser(email,password):
 		# so build a hash value for the new entry. We use bcrypt because
 		# it is slow and would help prevent a malicious attack
 		hashed_password  = get_hashed_password(password)
-		cur.execute("""INSERT INTO "User" (email, password) VALUES (%s,%s)""", (email,hashed_password))
+		cur.execute("""INSERT INTO "User" (email, password) VALUES (%s,%s)""", (email, hashed_password))
 		db.commit()
 
 		token = generate_token(email)
@@ -173,6 +221,9 @@ def newuser(email,password):
 	print("Error", email, "was already taken")
 	return "Error: Email address is already taken.", BAD_REQUEST
 
+
+
+# --------------------------------------------------------------------
 @app.route('/verifyuser/<token>')
 def verifyuser(token):
 	db = get_db()
@@ -183,14 +234,16 @@ def verifyuser(token):
 	except Exception as ex:
 		return str(ex), BAD_REQUEST
 
-	cur.execute("""Select * from "User" where email=%s""",(email,))
+	cur.execute("""SELECT * FROM "User" WHERE email = %s;""", (email,))
 	lst = cur.fetchall()
 	if len(lst) == 1:
-		cur.execute("""Update "User" SET validated=true where email=%s;""",(email,))
+		cur.execute("""UPDATE "User" SET validated = true WHERE email=%s;""",(email,))
 		db.commit()
 		return "OK"
 
 	return "Error: User does not exist.", BAD_REQUEST
+# --------------------------------------------------------------------
+
 
 
 # This will login with a user or create a user if no user by this email currently 
@@ -332,6 +385,27 @@ def getVehicleInfo(cur, vin):
 
 	return info
 
+# --------------------------------------------------------------------
+@app.route('/getuser/<email>')
+def getUser(email):
+
+	# Confirm identity here 
+
+	db = get_db()
+	cur = dub.cursor()
+
+	cur.execute(
+		"""SELECT * FROM "User" WHERE email = %s;""", (email)
+		)
+	lst = cur.fetchall()
+
+	if len(lst) == 0:
+		# No users found
+		return "Error: user not found.", BAD_REQUEST
+
+	print("List of users found: ")
+	print(jsonify(lst))
+# --------------------------------------------------------------------
 
 @app.route('/getvehicle/<name>')
 def getvehicle(name):
@@ -360,6 +434,7 @@ def getvehicle(name):
 	info.pop("modelid") # remove the modelid from the dictionary to be returned.
 
 	return jsonify(info)
+
 
 
 @app.route('/addvehicle/<name>/<vin>/<odo>')
