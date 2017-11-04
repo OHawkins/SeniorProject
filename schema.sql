@@ -9,11 +9,24 @@ DROP TABLE if exists public."VehicleModel";
 DROP TABLE if exists public."User";
 DROP TABLE if exists public."State";
 DROP TABLE if exists public."Country";
+DROP TABLE if exists public."Book";
 DROP SEQUENCE if exists user_id_seq;
 DROP SEQUENCE if exists model_id_seq;
 DROP SEQUENCE if exists vehicle_id_seq;
 
 
+CREATE TABLE public."Book"
+(
+  title varchar(300) NOT NULL,
+  author varchar(30) NOT NULL,
+  isbn varchar(30),
+  length integer
+)
+WITH (
+  OIDS=FALSE
+);
+
+INSERT INTO "Book" (title, author) VALUES ('The Last Battle', 'C. S. Lewis');
 
 CREATE TABLE public."Country"
 (
@@ -188,6 +201,8 @@ CREATE TABLE public."Fill"
 WITH (
   OIDS=FALSE
 );
+
+
 
 COMMENT ON COLUMN public."Fill".filledtank IS 'This indicates the tank was completely filled after this fill.';
 
