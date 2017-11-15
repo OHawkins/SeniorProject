@@ -25,7 +25,7 @@ CREATE TABLE public."User"
   l_name varchar(20) NOT NULL,
   password varchar(50) NOT NULL,
   dob date,
-  validated boolean,
+  isValidated boolean,
   CONSTRAINT "User_email_key" UNIQUE (email)
 );
 
@@ -50,6 +50,7 @@ CREATE TABLE public."Friends"
   PRIMARY KEY (user1, user2)
 )
 
+INSERT INTO "User" (email, f_name, l_name, password, dob, isValidated) VALUES ("hawkol01@luther.edu", "Olivia", "Hawkins", "stellar", 1995-11-07, True)
 
 -- CREATE TABLE public."Country"
 -- (

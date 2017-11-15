@@ -327,6 +327,25 @@ def getvehicles():
 
 	return jsonify(lst)
 
+# --------------------------------------------------------------------
+@app.route('/getevents')
+def getEvents():
+	try:
+		email, userid = confirmt_identity()
+	except Exception as ex:
+		return str(ex), BAD_REQUEST
+
+	db = get_db()
+	cur = db.cursor()
+
+	cur.execute("""SELECT * FROM "Event" WHERE user_email = %;""",(email,))
+	results = cur.fetchall()
+
+	return jsonify(results)
+
+# --------------------------------------------------------------------
+
+
 def getDataField(data_field, resp):
 	idx = resp.find('<td class="wrap"> ' + data_field + ' </td>')
 	if idx >= 0:
@@ -435,6 +454,39 @@ def getvehicle(name):
 
 	return jsonify(info)
 
+# --------------------------------------------------------------------
+@app.route('/addEvent/<email>/')
+def addEvent(startTime, endTime = null):
+
+	try:
+		email, userid = confirm_identity()
+	except Exception as ex:
+		return str(ex), BAD_REQUEST
+
+	db = get_db()
+	cur = db.cursor()
+
+	cur.execute("""INSERT INTO "Event" (user_email, start, finish) VALUES (%s, %s, %s);""",(email, startTime, endTime))
+	results = cur.fetchall()
+
+	db.commit()
+
+
+def changeType(eventId):
+	# Add or change the type of an event.
+	db = get_db()
+	cur = db.cursor()
+
+	cur.execute("""SELECT type FROM "Event" WHERE id = %s;""",(eventId))
+	results = cur.fetchall()
+
+	if len(results) != 1:
+		# something is seriously wrong
+		return Exception("Why are there multiple types?")
+
+	return jsonify(results)
+
+# --------------------------------------------------------------------
 
 
 @app.route('/addvehicle/<name>/<vin>/<odo>')
