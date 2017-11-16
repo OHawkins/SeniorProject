@@ -23,11 +23,11 @@ BAD_REQUEST = 400
 app = Flask(__name__)
 
 # Functions to write:
-	# make new user
+	# make new user ✓
 	# log in
 	# forgot password
-	# searh for user
-	# search for event
+	# search for user ✓
+	# search for event ✓
 	# create new event
 	# edit event
 	# view/get event
@@ -482,7 +482,7 @@ def changeType(eventId):
 
 	if len(results) != 1:
 		# something is seriously wrong
-		return Exception("Why are there multiple types?")
+		return Exception("Why are there multiple types (" + jsonify(results) + ") in the database?")
 
 	return jsonify(results)
 
